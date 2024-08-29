@@ -1,0 +1,8 @@
+# folders
+
+.vscode
+
+# files
+
+*.exe
+makefile

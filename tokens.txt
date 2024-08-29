@@ -1,0 +1,26 @@
+learn to use windows in, out, inout stuff and modify tokenize to take out Vector_Token tokens
+
+error:  cannot open file
+
+Directive
+{
+	name: global
+	args: main
+}
+
+Directive
+{
+	name: text
+	args:
+}
+
+Label
+{
+	name: loop
+}
+
+Instruction
+{
+	name: sbi
+	args: 0x5 5
+}
