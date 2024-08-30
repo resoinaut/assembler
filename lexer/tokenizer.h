@@ -5,7 +5,10 @@
 
 #include "token.h"
 
-/** @returns False on failure. Use strerror(errno) for error message. */
-_Check_return_ _Success_(return) bool Lexer_tokenize(_In_reads_bytes_(length) const char *line, _In_ size_t length, _Out_ Vector_Lexer_Token *tokens);
+_Check_return_ _Success_(return) bool tokenize(
+	_Out_              Vector_Token *tokens,
+	_In_reads_(length) const char   *line,
+	_In_ size_t                      length
+);
 
 #include "tokenizer.c"

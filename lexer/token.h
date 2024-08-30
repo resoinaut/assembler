@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../collections/string.h"
+#include "../utilities/string.h"
+#include "../utilities/vector.h"
 
-struct {
+typedef struct {
 	String type;
 	String name;
 	Vector_String args;
-} Lexer_Token;
+} Token;
 
-DEFINE_VECTOR(Lexer_Token)
+IMPLEMENT_VECTOR(Token)
