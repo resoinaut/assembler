@@ -1,29 +1,25 @@
-#include <ctype.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
+#include <vector>
+#include <fstream>
+#include <cstddef>
 
 #include "report.c"
-#include "lexer/tokenizer.h"
-#include "utilities/vector.h"
+#include "lexer/tokenizer.cc"
 
 // 4096 bytes (4KiB) is the most common OS page size
-#define BUFFER_SIZE 4096
+constexpr std::size_t BUFFER_SIZE 4096;
 
 int main(int argc, char *argv[]) {
 	putchar('\n');
 
 	if (argc < 2) {
 		report_title("nas assembler v. alpha 0.0.0");
-		return EXIT_SUCCESS;
+		return 1;
 	}
 
 	if (argc > 2) {
 		report_error("too many arguments");
 		report_issue("expected 1 and received %i", argc - 1);
-		return EXIT_FAILURE;
+		return 1;
 	}
 
 	FILE *file = fopen(argv[1], "r");
