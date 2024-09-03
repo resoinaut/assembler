@@ -1,8 +1,6 @@
-# folders
-
 .vscode
 
-# files
+# ignore output files
 
+*.asm
 *.exe
-makefile

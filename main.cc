@@ -1,77 +1,69 @@
-#include <vector>
-#include <fstream>
-#include <cstddef>
+#include <ios>       // std::ios
+#include <cerrno>    // errno
+#include <vector>    // std::vector
+#include <cstddef>   // std::size_t
+#include <fstream>   // std::ifstream
+#include <iostream>  // std::cout
+#include <algorithm> // std::min
 
-#include "report.c"
-#include "lexer/tokenizer.cc"
-
-// 4096 bytes (4KiB) is the most common OS page size
-constexpr std::size_t BUFFER_SIZE 4096;
+#include "ansi.cc"
+#include "shell.cc"
+#include "report.cc"
 
 int main(int argc, char *argv[]) {
 	putchar('\n');
 
 	if (argc < 2) {
-		report_title("nas assembler v. alpha 0.0.0");
-		return 1;
+		report::title("nas assembler v. alpha 0.0.0");
+
+		return 0;
 	}
 
 	if (argc > 2) {
-		report_error("too many arguments");
-		report_issue("expected 1 and received %i", argc - 1);
+		std::vector<shell::Argument> arguments = {
+			shell::Argument(argv[0], shell::MarkRule::none),
+			shell::Argument(argv[1], shell::MarkRule::success),
+		};
+
+		for (std::size_t i = 2; i < argc; i++)
+			arguments.push_back(shell::Argument(argv[i], shell::MarkRule::failure));
+
+		report::error("too many arguments");
+		report::issue("expected 1 and recieved %i", argc - 1);
+		report::shell(arguments);
+
 		return 1;
 	}
 
-	FILE *file = fopen(argv[1], "r");
+	std::ifstream file(argv[1], std::ios::in);
 
-	if (file == NULL) {
-		report_error("cannot open file");
-		report_issue(strerror(errno));
+	if (!file) {
+		report::error("failure opening file");
+		report::issue(errno);
 
-		fclose(file);
-		return EXIT_FAILURE;
+		return 1;
 	}
 
-	char buffer[BUFFER_SIZE];
+	char buffer[5]; // 4096
 
-	Vector_Token tokens;
-	Vector_Token_init(&tokens);
+	while (file) {
+		file.read(buffer, sizeof(buffer));
 
-	const size_t read_count = fread(buffer, sizeof(char), BUFFER_SIZE, file);
+		if (file.fail()) {
+			report::error("failure reading file");
+			report::issue(errno);
 
-	if (ferror(file) != 0) {
-		report_error("cannot read file");
-		report_issue(strerror(errno));
+			file.close();
 
-		fclose(file);
-		return EXIT_FAILURE;
-	}
-
-	int exit_code = EXIT_SUCCESS;
-
-	size_t start = 0;
-
-	for (size_t i = 0; i < read_count; i++) {
-		if (buffer[i] != '\n') continue;
-
-		bool success = tokenize(&tokens, &buffer[start], &buffer[i] - &buffer[start]);
-		
-		if (!success) {
-			report_error("cannot tokenize source");
-			exit_code = EXIT_FAILURE;
-			goto exit;
+			return 1;
 		}
 
-		start = i + 1;
+		std::cout.write(buffer, std::min(sizeof(buffer), static_cast<size_t>(file.gcount())));
 	}
 
-	buffer[read_count] = '\0';
-	printf(buffer);
+	std::cout << ansi::cursor::up;
 
-	exit:
+	file.close();
 
-	fclose(file);
-	Vector_Token_free(&tokens);
-
-	return exit_code;
+	return 0;
 }
