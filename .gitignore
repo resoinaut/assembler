@@ -2,5 +2,4 @@
 
 # ignore output files
 
-*.asm
 *.exe
